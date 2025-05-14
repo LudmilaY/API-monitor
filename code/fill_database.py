@@ -1,4 +1,3 @@
-import psycopg2
 import json
 from datetime import datetime
 from connect_db import connect_db

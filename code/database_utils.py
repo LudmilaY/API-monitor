@@ -1,5 +1,3 @@
-import psycopg2
-from psycopg2 import sql
 from datetime import datetime
 from connect_db import connect_db
 

@@ -20,13 +20,13 @@ class MetricType(str, Enum):
 
 @app.get("/search-metrics")
 def search_metric(
-    tipo: MetricType,
+    type_of: MetricType,
     data_start: date,
     data_end: date,
     inverter_id: Optional[int] = None,
     plant_id: Optional[int] = None
 ):
-    if tipo == MetricType.max_power:
+    if type_of == MetricType.max_power:
         if not inverter_id:
             raise HTTPException(status_code=400, detail="inverter_id is a constraint to maximum power metric.")
         return [
@@ -34,7 +34,7 @@ def search_metric(
             for d, p in max_power_per_day(inverter_id, data_start, data_end)
         ]
 
-    elif tipo == MetricType.medium_temperature:
+    elif type_of == MetricType.medium_temperature:
         if not inverter_id:
             raise HTTPException(status_code=400, detail="inverter_id is a constraint to medium temperature metric.")
         return [
@@ -42,19 +42,25 @@ def search_metric(
             for d, t in medium_temperature_per_day(inverter_id, data_start, data_end)
         ]
 
-    elif tipo == MetricType.plant_generation:
+    elif type_of == MetricType.plant_generation:
         if not plant_id:
             raise HTTPException(status_code=400, detail="plant_id is a constraint to plant generation metric.")
+
+        results = plant_generation_per_range(plant_id, data_start, data_end)
+
+        if results is None:
+            raise HTTPException(status_code=404, detail="Couldn't find any data on this range.")
+
         return [
-            {"data": str(d), "total_energy": e}
+            {"data": str(d), "total_energy_kWh": e}
             for d, e in plant_generation_per_range(plant_id, data_start, data_end)
         ]
 
-    elif tipo == MetricType.inverter_generation:
+    elif type_of == MetricType.inverter_generation:
         if not inverter_id:
             raise HTTPException(status_code=400, detail="inverter_id is a constraint to inverter generation metric.")
         return [
-            {"data": str(d), "total_energy": e}
+            {"data": str(d), "total_energy_kWh": e}
             for d, e in inverter_generation_per_range(inverter_id, data_start, data_end)
         ]
 
